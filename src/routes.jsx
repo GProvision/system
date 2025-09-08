@@ -2,6 +2,11 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { Toaster } from "react-hot-toast";
 import Login from "./pages/Login";
 import Autenticados from "./layouts/Autenticados";
+import OpticasPage from "./pages/Opticas/OpticasPage";
+import OpticasNuevas from "./pages/Opticas/OpticasNuevas";
+import OpticaPage from "./pages/Opticas/OpticaPage";
+import OpticasDelegaciones from "./pages/Opticas/OpticasDelegaciones";
+import OpticasSindicatos from "./pages/Opticas/OpticasSindicatos";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -66,39 +71,28 @@ const routes = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <h1>Opticas</h1>,
+            element: <OpticasPage />,
           },
           {
             path: "crear",
-            element: (
-              <>
-                <h1>Optica Nueva</h1>
-              </>
-            ),
+            element: <OpticasNuevas />,
           },
           {
             path: ":id",
-            element: (
-              <>
-                <h1>Optica</h1>
-              </>
-            ),
-          },
-          {
-            path: ":id/delegaciones",
-            element: (
-              <>
-                <h1>Optica Delegaciones</h1>
-              </>
-            ),
-          },
-          {
-            path: ":id/:delegacion/sindicatos",
-            element: (
-              <>
-                <h1>Optica Delegacion Sindicatos</h1>
-              </>
-            ),
+            children: [
+              {
+                index: true,
+                element: <OpticaPage />,
+              },
+              {
+                path: "delegaciones",
+                element: <OpticasDelegaciones />,
+              },
+              {
+                path: ":delegacion/sindicatos",
+                element: <OpticasSindicatos />,
+              },
+            ],
           },
         ],
       },
