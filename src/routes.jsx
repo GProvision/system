@@ -5,7 +5,6 @@ import Autenticados from "./layouts/Autenticados";
 import OpticasPage from "./pages/Opticas/OpticasPage";
 import OpticasNuevas from "./pages/Opticas/OpticasNuevas";
 import OpticaPage from "./pages/Opticas/OpticaPage";
-import OpticasDelegaciones from "./pages/Opticas/OpticasDelegaciones";
 import OpticasSindicatos from "./pages/Opticas/OpticasSindicatos";
 const routes = createBrowserRouter([
   {
@@ -83,10 +82,6 @@ const routes = createBrowserRouter([
               {
                 index: true,
                 element: <OpticaPage />,
-              },
-              {
-                path: "delegaciones",
-                element: <OpticasDelegaciones />,
               },
               {
                 path: ":delegacion/sindicatos",
