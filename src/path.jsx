@@ -2,24 +2,27 @@ const path = {};
 
 path.admin = [
   { path: "/admin", alias: "Inicio", principal: true },
-  { path: "/opticas", alias: "Opticas", principal: true },
-  { path: "/opticas/:id", alias: "Optica", principal: false },
-  { path: "/opticas/crear", alias: "Nueva Optica", principal: false },
+  { path: "/sindicatos", alias: "Sindicatos", principal: true },
+  { path: "/sindicatos/:id", alias: "Sindicato", principal: false },
   {
-    path: "/opticas/:id/delegaciones",
+    path: "/delegaciones",
     alias: "Delegaciones",
+    principal: true,
+  },
+  {
+    path: "/delegaciones/:id",
+    alias: "Delegacion",
     principal: false,
   },
   {
-    path: "/opticas/:id/:delegacion/sindicatos",
-    alias: "Sindicatos",
+    path: "/delegaciones/:id/:optica",
+    alias: "Optica",
     principal: false,
   },
   { path: "/armazones", alias: "Armazones", principal: true },
-  { path: "/armazones/crear", alias: "Nuevo Armazon", principal: false },
-  { path: "/armazones/stock", alias: "Armazones Stock", principal: false },
+  { path: "/armazones/:id", alias: "Armazon", principal: false },
+  { path: "/armazones/:id/stock", alias: "Armazones Stock", principal: false },
   { path: "/usuarios", alias: "Usuarios", principal: true },
-  { path: "/admin/complementos", alias: "Complementos", principal: true },
 ];
 path.boss = [
   { path: "/boss", alias: "inicio", principal: true },
@@ -39,8 +42,6 @@ path.employed = [
   { path: "/fichas/:id", alias: "Fichas Detalle", principal: false },
   { path: "/fichas/crear", alias: "Nueva Fichas ", principal: false },
   { path: "/armazones", alias: "Armazones", principal: true },
-  { path: "/armazones/crear", alias: "Nuevo Armazon", principal: false },
-  { path: "/armazones/stock", alias: "Armazones Stock", principal: false },
 ];
 
 export default path;

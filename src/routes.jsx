@@ -2,10 +2,14 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { Toaster } from "react-hot-toast";
 import Login from "./pages/Login";
 import Autenticados from "./layouts/Autenticados";
-import OpticasPage from "./pages/Opticas/OpticasPage";
-import OpticasNuevas from "./pages/Opticas/OpticasNuevas";
-import OpticaPage from "./pages/Opticas/OpticaPage";
-import OpticasSindicatos from "./pages/Opticas/OpticasSindicatos";
+import SindicatosPage from "./pages/sindicatos/SindicatosPage";
+import SindicatoPage from "./pages/sindicatos/SindicatoPage";
+import DelegacionesPage from "./pages/delegaciones/DelegacionesPage";
+import DelegacionPage from "./pages/delegaciones/DelegacionPage";
+import DelegacionOpticaPage from "./pages/delegaciones/DelegacionOpticaPage";
+import ArmazonesPage from "./pages/armazones/ArmazonesPage";
+import ArmazonPage from "./pages/armazones/ArmazonPage";
+import ArmazonStockPage from "./pages/armazones/ArmazonStockPage";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -65,27 +69,65 @@ const routes = createBrowserRouter([
         ],
       },
       {
-        path: "opticas",
+        path: "sindicatos",
         element: <Autenticados />,
         children: [
           {
             index: true,
-            element: <OpticasPage />,
-          },
-          {
-            path: "crear",
-            element: <OpticasNuevas />,
+            element: <SindicatosPage />,
           },
           {
             path: ":id",
             children: [
               {
                 index: true,
-                element: <OpticaPage />,
+                element: <SindicatoPage />,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "delegaciones",
+        element: <Autenticados />,
+        children: [
+          {
+            index: true,
+            element: <DelegacionesPage />,
+          },
+          {
+            path: ":id",
+            children: [
+              {
+                index: true,
+                element: <DelegacionPage />,
               },
               {
-                path: ":delegacion/sindicatos",
-                element: <OpticasSindicatos />,
+                path: ":optica",
+                element: <DelegacionOpticaPage />,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "armazones",
+        element: <Autenticados />,
+        children: [
+          {
+            index: true,
+            element: <ArmazonesPage />,
+          },
+          {
+            path: ":id",
+            children: [
+              {
+                index: true,
+                element: <ArmazonPage />,
+              },
+              {
+                path: "stock",
+                element: <ArmazonStockPage />,
               },
             ],
           },
