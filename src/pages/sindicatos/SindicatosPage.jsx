@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { toast } from "react-hot-toast";
 const SindicatosPage = () => {
   const [sindicatos, setSindicatos] = useState([]);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm();
   const navigate = useNavigate();
   const getSindicatos = async () => {
@@ -17,16 +18,24 @@ const SindicatosPage = () => {
   };
 
   const addSindicato = async (data) => {
-    const response = await fetch("/api/sindicatos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      await getSindicatos();
-      setIsAddFormOpen(false);
+    try {
+      const response = await fetch("/api/sindicatos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        await getSindicatos();
+        setIsAddFormOpen(false);
+        toast.success("Sindicato agregado exitosamente");
+      } else {
+        const { error } = await response.json();
+        throw new Error(error);
+      }
+    } catch (error) {
+      toast.error(error);
     }
   };
 
@@ -61,16 +70,33 @@ const SindicatosPage = () => {
             </button>
           </div>
           <form onSubmit={handleSubmit(addSindicato)}>
-            <div className="mb-4">
+            <fieldset className="mb-4">
               <label className="block text-sm font-medium text-gray-700">
                 Nombre
               </label>
               <input
                 type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                {...register("nombre")}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
+                  errors.nombre ? "border-red-500" : ""
+                }`}
+                {...register("nombre", {
+                  required: "El nombre es requerido",
+                  minLength: {
+                    value: 3,
+                    message: "El nombre debe tener al menos 3 caracteres",
+                  },
+                  maxLength: {
+                    value: 100,
+                    message: "El nombre debe tener menos de 100 caracteres",
+                  },
+                })}
               />
-            </div>
+              {errors.nombre && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.nombre.message}
+                </p>
+              )}
+            </fieldset>
             <button
               type="submit"
               disabled={isSubmitting}
