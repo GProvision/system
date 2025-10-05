@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate, Outlet, useMatch, useLocation } from "react-router";
 import useUser from "../context/useUser";
-import Header from "../components/shared/header";
+import Header from "../components/shared/Header";
 import Footer from "../components/shared/Footer";
 import path from "../path";
 
