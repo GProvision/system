@@ -16,7 +16,7 @@ const routes = createBrowserRouter([
     element: (
       <>
         <Outlet />
-        <Toaster position="top-center" reverseOrder={false} />
+        <Toaster position="top-right" reverseOrder={true} />
       </>
     ),
     children: [

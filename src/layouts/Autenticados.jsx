@@ -4,7 +4,6 @@ import useUser from "../context/useUser";
 import Header from "../components/shared/Header";
 import Footer from "../components/shared/Footer";
 import path from "../path";
-import { Toaster } from "react-hot-toast";
 
 const useRouteAccess = (user) => {
   const location = useLocation();
@@ -39,7 +38,6 @@ const Autenticados = () => {
         <Outlet />
       </main>
       <Footer />
-      <Toaster position="top-center" reverseOrder={false} />
     </>
   );
 };

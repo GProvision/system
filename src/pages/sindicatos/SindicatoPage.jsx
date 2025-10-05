@@ -1,7 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { X, Save, Pen, Info, ChevronLeft, Trash2 } from "lucide-react";
+import {
+  X,
+  Save,
+  Pen,
+  Info,
+  ChevronLeft,
+  Trash2,
+  Loader,
+  Check,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 const SindicatoPage = () => {
@@ -54,7 +63,6 @@ const SindicatoPage = () => {
         await getSindicato();
         setIsEditFormOpen(false);
         toast.success("Sindicato editado exitosamente");
-        reset();
       } else {
         const { error } = await response.json();
         throw new Error(error);
@@ -129,18 +137,18 @@ const SindicatoPage = () => {
           <button
             type="button"
             onClick={() => setIsEditFormOpen(true)}
-            className=" cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-yellow-100 border border-yellow-300 rounded-md hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+            className=" cursor-pointer inline-flex items-center justify-center p-2 text-sm font-medium text-gray-900 bg-yellow-100 border border-yellow-300 rounded-md hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
             aria-label="Cancelar edición del sindicato"
           >
-            <Pen className="w-4 h-4 mr-2" /> Editar Sindicato
+            <Pen className="size-4 text-amber-500" />
           </button>
           <button
             type="button"
             onClick={() => deleteSindicato()}
-            className=" cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+            className=" cursor-pointer inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
             aria-label="Cancelar edición del sindicato"
           >
-            <Trash2 className="w-4 h-4 mr-2" /> Eliminar Sindicato
+            <Trash2 className="size-4 text-red-500" />
           </button>
         </div>
       </header>
@@ -151,15 +159,15 @@ const SindicatoPage = () => {
               Editar Sindicato
             </h2>
             <button
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               aria-label="Cancelar edición del sindicato"
               onClick={() => setIsEditFormOpen(false)}
             >
-              <X className="w-4 h-4 mr-2" /> Cancelar
+              <X className="size-4 text-red-500" />
             </button>
           </header>
           <form
-            className="space-y-4 grid grid-cols-1 gap-4"
+            className="space-y-4 flex flex-col items-center justify-start gap-4"
             onSubmit={handleSubmit(editSindicato)}
           >
             <fieldset className="flex flex-wrap items-center">
@@ -210,7 +218,7 @@ const SindicatoPage = () => {
                 </p>
               )}
             </fieldset>
-            <fieldset className="flex items-center">
+            <fieldset className="flex items-center gap-1">
               <input
                 id="activo"
                 type="checkbox"
@@ -222,7 +230,7 @@ const SindicatoPage = () => {
                 htmlFor="activo"
                 className="text-sm font-medium text-gray-700 cursor-pointer"
               >
-                Sindicato activo
+                Activo
               </label>
               <div id="activo-help" className="sr-only">
                 Indica si el sindicato está activo
@@ -231,49 +239,16 @@ const SindicatoPage = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+              className="inline-flex items-center justify-center p-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
               aria-describedby="submit-help"
             >
               {isSubmitting ? (
                 <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Actualizando...
+                  <Loader className="size-4 animate-spin" />
                 </>
               ) : (
                 <>
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  Actualizar Sindicato
+                  <Check className="size-4" />
                 </>
               )}
             </button>
