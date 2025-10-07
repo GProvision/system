@@ -6,8 +6,8 @@ import { Loader, Plus, Save, X } from "lucide-react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "../../components/shared/Button";
-const SindicatosPage = () => {
-  const [sindicatos, setSindicatos] = useState([]);
+const OpticasPage = () => {
+  const [opticas, setOpticas] = useState([]);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const {
     register,
@@ -31,73 +31,67 @@ const SindicatosPage = () => {
           )
           .refine(
             (val) => {
-              return !sindicatos.find(
+              return !opticas.find(
                 (o) => o.nombre.toLowerCase() === val.toLowerCase()
               );
             },
-            { message: "Ya existe un sindicato con ese nombre" }
+            { message: "Ya existe una optica con ese nombre" }
           ),
       })
     ),
     defaultValues: { nombre: "" },
   });
   const navigate = useNavigate();
-  const getSindicatos = async () => {
-    const response = await fetch("/api/sindicatos");
+  const getOpticas = async () => {
+    const response = await fetch("/api/opticas");
     const data = await response.json();
-    setSindicatos(data);
+    setOpticas(data);
   };
-
-  const addSindicato = async (data) => {
+  const addOptica = async (data) => {
     try {
-      const response = await fetch("/api/sindicatos", {
+      const response = await fetch("/api/opticas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
-      if (response.ok) {
-        await getSindicatos();
-        setIsAddFormOpen(false);
-        reset();
-        toast.success("Sindicato agregado exitosamente");
-      } else {
+      if (!response.ok) {
         const { error } = await response.json();
         throw new Error(error.split(":")[1].trim());
       }
+      await getOpticas();
+      setIsAddFormOpen(false);
+      toast.success("Optica agregada exitosamente");
+      reset();
     } catch (error) {
-      toast.error(error.message || "Error al agregar el sindicato");
+      toast.error(error.message || "Error al agregar la optica");
     }
   };
-
   useEffect(() => {
-    getSindicatos();
+    getOpticas();
   }, []);
 
-  if (!sindicatos) return null;
-
+  if (!opticas) return <Loader className="animate-spin mx-auto" />;
   return (
     <section className="container mx-auto px-4 py-8 max-w-6xl">
       <header className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Sindicatos</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Opticas</h1>
         <Button
           onClick={() => setIsAddFormOpen(!isAddFormOpen)}
           type={!isAddFormOpen ? "add" : "cancel"}
         >
           {!isAddFormOpen ? (
-            <Plus className="size-4 text-blue-50" />
+            <Plus className="size-4" />
           ) : (
-            <X className="size-4 text-red-50" />
+            <X className="size-4" />
           )}
         </Button>
       </header>
       {isAddFormOpen && (
         <section className="mb-8 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
           <header className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Agregar Sindicato
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">Agregar Optica</h2>
           </header>
           <form className="flex flex-col gap-4 items-center justify-start max-w-xl mx-auto">
             <fieldset className="flex flex-wrap items-center">
@@ -105,34 +99,25 @@ const SindicatosPage = () => {
                 htmlFor="nombre"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Nombre del Sindicato
+                Nombre de la Optica
                 <span className="text-red-500" aria-label="campo requerido">
                   *
                 </span>
               </label>
               <input
-                id="nombre"
                 type="text"
-                aria-required="true"
-                aria-describedby={
-                  errors.nombre ? "nombre-error" : "nombre-help"
-                }
-                className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                id="nombre"
+                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                   errors.nombre
                     ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500"
                     : "border-gray-300 hover:border-gray-400"
                 }`}
-                placeholder="Ingrese el nombre del sindicato"
+                placeholder="Ingrese el nombre de la optica"
+                autoComplete="off"
                 {...register("nombre")}
               />
-              <div id="nombre-help" className="sr-only">
-                Ingrese el nombre del sindicato
-              </div>
               {errors.nombre && (
-                <p
-                  className="mt-2 text-sm text-red-600 flex items-center"
-                  role="alert"
-                >
+                <p className="text-red-500 text-sm mt-1">
                   {errors.nombre.message}
                 </p>
               )}
@@ -140,10 +125,10 @@ const SindicatosPage = () => {
             <Button
               type="add"
               disabled={isSubmitting}
-              onClick={handleSubmit(addSindicato)}
+              onClick={handleSubmit(addOptica)}
             >
               {isSubmitting ? (
-                <Loader className="size-4 animate-spin" />
+                <Loader className="animate-spin size-4" />
               ) : (
                 <Save className="size-4" />
               )}
@@ -151,53 +136,53 @@ const SindicatosPage = () => {
           </form>
         </section>
       )}
-
-      {sindicatos.length === 0 && (
+      {opticas.length === 0 && (
         <div className="px-6 py-4 text-center text-sm text-gray-500">
-          No hay sindicatos
+          No hay Opticas
         </div>
       )}
-
-      {sindicatos.length > 0 && (
-        <table className="min-w-full divide-y divide-gray-200 overflow-x-scroll">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nombre
-              </th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sindicatos.map((sindicato) => (
-              <tr
-                key={sindicato.id}
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => navigate(`/sindicatos/${sindicato.id}`)}
-              >
-                <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium text-gray-900 ">
-                  {sindicato.nombre}
-                </td>
-                <td className="px-2 py-4">
-                  <span
-                    className={`px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
-                      sindicato.activo
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {sindicato.activo ? "Activo" : "Inactivo"}
-                  </span>
-                </td>
+      {opticas.length > 0 && (
+        <section className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 overflow-x-scroll">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nombre
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {opticas.map((optica) => (
+                <tr
+                  key={optica.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/opticas/${optica.id}`)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium text-gray-900 ">
+                    {optica.nombre}
+                  </td>
+                  <td className="px-2 py-4">
+                    <span
+                      className={`px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
+                        optica.activo
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {optica.activo ? "Activo" : "Inactivo"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
       )}
     </section>
   );
 };
 
-export default SindicatosPage;
+export default OpticasPage;

@@ -10,6 +10,8 @@ import DelegacionOpticaPage from "./pages/delegaciones/DelegacionOpticaPage";
 import ArmazonesPage from "./pages/armazones/ArmazonesPage";
 import ArmazonPage from "./pages/armazones/ArmazonPage";
 import ArmazonStockPage from "./pages/armazones/ArmazonStockPage";
+import OpticasPage from "./pages/opticas/OpticasPage";
+import OpticaPage from "./pages/opticas/OpticaPage";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -130,6 +132,20 @@ const routes = createBrowserRouter([
                 element: <ArmazonStockPage />,
               },
             ],
+          },
+        ],
+      },
+      {
+        path: "opticas",
+        element: <Autenticados />,
+        children: [
+          {
+            index: true,
+            element: <OpticasPage />,
+          },
+          {
+            path: ":id",
+            element: <OpticaPage />,
           },
         ],
       },

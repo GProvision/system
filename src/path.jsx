@@ -15,7 +15,12 @@ path.admin = [
     principal: false,
   },
   {
-    path: "/delegaciones/:id/:optica",
+    path: "/opticas/",
+    alias: "Optica",
+    principal: true,
+  },
+  {
+    path: "/opticas/:id",
     alias: "Optica",
     principal: false,
   },

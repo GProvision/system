@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import {
-  X,
-  Save,
-  Pen,
-  Info,
-  ChevronLeft,
-  Trash2,
-  Loader,
-  Check,
-} from "lucide-react";
+import { X, Pen, ChevronLeft, Trash2, Loader, Check } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
+import Button from "../../components/shared/Button";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 const SindicatoPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,9 +16,23 @@ const SindicatoPage = () => {
     register,
     handleSubmit,
     setValue,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm({
+    resolver: zodResolver(
+      z.object({
+        nombre: z.string().refine((val) => {
+          let text = val.trim();
+          // Contar los caracteres sin espacios internos
+          let regex = /\s+/g;
+          text = text.replace(regex, " ");
+          return text.length > 3;
+        }),
+        activo: z.preprocess(
+          (val) => val === "on" || val === true,
+          z.boolean()
+        ),
+      })
+    ),
     defaultValues: {
       nombre: "",
       activo: false,
@@ -59,14 +67,13 @@ const SindicatoPage = () => {
         },
         body: JSON.stringify({ ...data, idSindicato: Number(id) }),
       });
-      if (response.ok) {
-        await getSindicato();
-        setIsEditFormOpen(false);
-        toast.success("Sindicato editado exitosamente");
-      } else {
+      if (!response.ok) {
         const { error } = await response.json();
-        throw new Error(error);
+        throw new Error(error.split(":")[1].trim());
       }
+      await getSindicato();
+      setIsEditFormOpen(false);
+      toast.success("Sindicato editado exitosamente");
     } catch (error) {
       toast.error(error);
     }
@@ -92,13 +99,12 @@ const SindicatoPage = () => {
         },
         body: JSON.stringify({ id: Number(id) }),
       });
-      if (response.ok) {
-        navigate("/sindicatos");
-        toast.success("Sindicato eliminado exitosamente");
-      } else {
+      if (!response.ok) {
         const { error } = await response.json();
         throw new Error(error);
       }
+      navigate("/sindicatos");
+      toast.success("Sindicato eliminado exitosamente");
     } catch (error) {
       toast.error(error);
     }
@@ -112,14 +118,13 @@ const SindicatoPage = () => {
     <section className="container mx-auto px-4 py-8 max-w-6xl">
       <header className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Button
             onClick={() => navigate("/sindicatos")}
-            className=" cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            type="default"
             aria-label="Cancelar edición del sindicato"
           >
-            <ChevronLeft className="w-4 h-4 mr-2" /> Regresar
-          </button>
+            <ChevronLeft className="size-4" />
+          </Button>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           {sindicato.nombre}
@@ -134,22 +139,23 @@ const SindicatoPage = () => {
           </span>
         </h1>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsEditFormOpen(true)}
-            className=" cursor-pointer inline-flex items-center justify-center p-2 text-sm font-medium text-gray-900 bg-yellow-100 border border-yellow-300 rounded-md hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
-            aria-label="Cancelar edición del sindicato"
+          <Button
+            type={isEditFormOpen ? "cancel" : "edit"}
+            onClick={() => setIsEditFormOpen(!isEditFormOpen)}
           >
-            <Pen className="size-4 text-amber-500" />
-          </button>
-          <button
-            type="button"
+            {!isEditFormOpen ? (
+              <Pen className="size-4" />
+            ) : (
+              <X className="size-4" />
+            )}
+          </Button>
+          <Button
+            type="cancel"
             onClick={() => deleteSindicato()}
-            className=" cursor-pointer inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
             aria-label="Cancelar edición del sindicato"
           >
-            <Trash2 className="size-4 text-red-500" />
-          </button>
+            <Trash2 className="size-4" />
+          </Button>
         </div>
       </header>
       {isEditFormOpen && (
@@ -158,18 +164,8 @@ const SindicatoPage = () => {
             <h2 className="text-2xl font-bold text-gray-900">
               Editar Sindicato
             </h2>
-            <button
-              className="inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-              aria-label="Cancelar edición del sindicato"
-              onClick={() => setIsEditFormOpen(false)}
-            >
-              <X className="size-4 text-red-500" />
-            </button>
           </header>
-          <form
-            className="space-y-4 flex flex-col items-center justify-start gap-4"
-            onSubmit={handleSubmit(editSindicato)}
-          >
+          <form className="space-y-4 flex flex-col items-center justify-start gap-4">
             <fieldset className="flex flex-wrap items-center">
               <label
                 htmlFor="nombre"
@@ -213,7 +209,6 @@ const SindicatoPage = () => {
                   className="mt-2 text-sm text-red-600 flex items-center"
                   role="alert"
                 >
-                  <Info className="w-4 h-4 mr-2" />
                   {errors.nombre.message}
                 </p>
               )}
@@ -236,22 +231,17 @@ const SindicatoPage = () => {
                 Indica si el sindicato está activo
               </div>
             </fieldset>
-            <button
+            <Button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center p-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
-              aria-describedby="submit-help"
+              onClick={handleSubmit(editSindicato)}
             >
               {isSubmitting ? (
-                <>
-                  <Loader className="size-4 animate-spin" />
-                </>
+                <Loader className="size-4 animate-spin" />
               ) : (
-                <>
-                  <Check className="size-4" />
-                </>
+                <Check className="size-4" />
               )}
-            </button>
+            </Button>
           </form>
         </section>
       )}
