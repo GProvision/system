@@ -149,13 +149,15 @@ const SindicatoPage = () => {
               <X className="size-4" />
             )}
           </Button>
-          <Button
-            type="cancel"
-            onClick={() => deleteSindicato()}
-            aria-label="Cancelar edición del sindicato"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {!sindicato.activo && (
+            <Button
+              type="cancel"
+              onClick={() => deleteSindicato()}
+              aria-label="Cancelar edición del sindicato"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       </header>
       {isEditFormOpen && (

@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "react-hot-toast";
-import { Loader, Plus, Save, X } from "lucide-react";
-
+import { ChevronLeft, Loader, Plus, Save, X } from "lucide-react";
+import Button from "../../components/shared/Button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 const DelegacionesPage = () => {
   const [delegaciones, setDelegaciones] = useState([]);
   const [provincias, setProvincias] = useState([]);
@@ -18,6 +20,16 @@ const DelegacionesPage = () => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm({
+    resolver: zodResolver(
+      z.object({
+        provincia: z.string().min(1, "La provincia es requerida"),
+        localidad: z.string().min(1, "La localidad es requerida"),
+        activo: z.preprocess(
+          (val) => val === "on" || val === true,
+          z.boolean()
+        ),
+      })
+    ),
     defaultValues: {
       provincia: "",
       localidad: "",
@@ -96,12 +108,16 @@ const DelegacionesPage = () => {
     <section className="container mx-auto px-4 py-8 max-w-6xl">
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-900">Delegaciones</h1>
-        <button
-          onClick={() => setIsAddFormOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-2 flex items-center justify-center rounded"
+        <Button
+          type={!isAddFormOpen ? "add" : "cancel"}
+          onClick={() => setIsAddFormOpen(!isAddFormOpen)}
         >
-          <Plus className="size-4" />
-        </button>
+          {!isAddFormOpen ? (
+            <Plus className="size-4" />
+          ) : (
+            <X className="size-4" />
+          )}
+        </Button>
       </header>
       {isAddFormOpen && (
         <section className="mb-8 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
@@ -109,18 +125,8 @@ const DelegacionesPage = () => {
             <h2 className="text-2xl font-bold text-gray-900">
               Agregar Delegacion
             </h2>
-            <button
-              className="inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-              aria-label="Cancelar edición del sindicato"
-              onClick={() => setIsAddFormOpen(false)}
-            >
-              <X className="size-4 text-red-500" />
-            </button>
           </header>
-          <form
-            className="flex flex-col gap-4 items-center justify-start max-w-xl mx-auto"
-            onSubmit={handleSubmit(addDelegacion)}
-          >
+          <form className="flex flex-col gap-4 items-center justify-start max-w-xl mx-auto">
             <fieldset className="w-full flex flex-col items-center justify-start">
               <label
                 className="block text-sm font-medium text-gray-700 mb-2"
@@ -192,9 +198,9 @@ const DelegacionesPage = () => {
                 ))}
               </select>
             </fieldset>
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white flex cursor-pointer items-center justify-center p-2 rounded"
-              type="submit"
+            <Button
+              type="add"
+              onClick={handleSubmit(addDelegacion)}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -202,7 +208,7 @@ const DelegacionesPage = () => {
               ) : (
                 <Save className="size-4" />
               )}
-            </button>
+            </Button>
           </form>
         </section>
       )}
@@ -244,17 +250,16 @@ const DelegacionesPage = () => {
             </tbody>
           </table>
           <form className="flex justify-center items-center gap-2">
-            <button
-              type="button"
+            <Button
+              type="default-outline"
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
-              className="cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Anterior
-            </button>
+              <ChevronLeft className="size-4" />
+            </Button>
             <output>{page}</output>
-            <button
-              type="button"
+            <Button
+              type="default-outline"
               onClick={() => setPage(page + 1)}
               disabled={
                 page ===
@@ -262,10 +267,9 @@ const DelegacionesPage = () => {
                   delegaciones.slice((page - 1) * 10, page * 10).length / 10
                 )
               }
-              className="cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Siguiente
-            </button>
+              <ChevronLeft className="size-4 rotate-180" />
+            </Button>
           </form>
         </>
       )}

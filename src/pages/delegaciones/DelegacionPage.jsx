@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { X, Save, Pen, Info, ChevronLeft, Trash2, Loader } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
+import Button from "../../components/shared/Button";
 
 const DelegacionPage = () => {
   const { id } = useParams();
@@ -84,6 +85,19 @@ const DelegacionPage = () => {
       toast.error("Debe seleccionar una localidad");
       return;
     }
+    const confirmResult = await Swal.fire({
+      title: "¿Está seguro?",
+      text: "Se editará la delegación con los nuevos datos.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, editar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
     try {
       const response = await fetch("/api/delegaciones/update", {
         method: "PUT",
@@ -131,14 +145,9 @@ const DelegacionPage = () => {
     <section className="container mx-auto px-4 py-8 max-w-6xl">
       <header className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigate("/delegaciones")}
-            className=" cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            aria-label="Cancelar edición del sindicato"
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" /> Regresar
-          </button>
+          <Button onClick={() => navigate("/delegaciones")}>
+            <ChevronLeft className="size-4" />
+          </Button>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           {delegacion.provincia} - {delegacion.localidad}
@@ -153,22 +162,21 @@ const DelegacionPage = () => {
           </span>
         </h1>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsEditFormOpen(true)}
-            className=" cursor-pointer inline-flex items-center justify-center p-2 text-sm font-medium text-gray-900 bg-yellow-100 border border-yellow-300 rounded-md hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
-            aria-label="Editar Delegación"
+          <Button
+            type={!isEditFormOpen ? "edit" : "cancel"}
+            onClick={() => setIsEditFormOpen(!isEditFormOpen)}
           >
-            <Pen className="size-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => console.log("Eliminar")}
-            className=" cursor-pointer inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-            aria-label="Eliminar Delegación"
-          >
-            <Trash2 className="size-4" />
-          </button>
+            {!isEditFormOpen ? (
+              <Pen className="size-4" />
+            ) : (
+              <X className="size-4" />
+            )}
+          </Button>
+          {!delegacion.activo && (
+            <Button type="cancel" onClick={() => console.log("Eliminar")}>
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       </header>
       {isEditFormOpen && (
@@ -177,13 +185,6 @@ const DelegacionPage = () => {
             <h2 className="text-2xl font-bold text-gray-900">
               Editar Delegacion
             </h2>
-            <button
-              className="inline-flex items-center justify-center p-2 text-sm font-medium text-gray-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-              aria-label="Cancelar edición del sindicato"
-              onClick={() => setIsEditFormOpen(false)}
-            >
-              <X className="size-4 text-red-500" />
-            </button>
           </header>
           <form
             className="flex flex-col gap-4 items-center justify-start max-w-xl mx-auto"
