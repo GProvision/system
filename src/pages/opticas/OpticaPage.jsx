@@ -20,6 +20,8 @@ const OpticaPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [optica, setOptica] = useState(null);
+  const [idSindicato, setIdSindicato] = useState(null);
+  const [idDelegacion, setIdDelegacion] = useState(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isAddSindicatoFormOpen, setIsAddSindicatoFormOpen] = useState(false);
   const [isAddDelegacionFormOpen, setIsAddDelegacionFormOpen] = useState(false);
@@ -148,8 +150,8 @@ const OpticaPage = () => {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, eliminar",
-        cancelButtonText: "Cancelar",
+        confirmButtonText: "Sí, actualizar",
+        cancelButtonText: "No, cancelar",
       });
       if (!confirm.isConfirmed) return;
       const response = await fetch("/api/opticas/update", {
@@ -194,6 +196,42 @@ const OpticaPage = () => {
     }
   };
 
+  const removeSindicato = async (data) => {
+    try {
+      const confirm = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "¿Estás seguro de remover este sindicato?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, remover",
+        cancelButtonText: "No, cancelar",
+      });
+      if (!confirm.isConfirmed) return;
+      setIdSindicato(data.idSindicato);
+      const response = await fetch("/api/opticas/removeSindicato", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...data, id }),
+      });
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error.split(":")[1].trim());
+      }
+      await getOpticas();
+      await getOptica();
+      setIsAddSindicatoFormOpen(false);
+      toast.success("Sindicato removido exitosamente");
+    } catch (error) {
+      toast.error(error.message || "Error al remover el sindicato");
+    } finally {
+      setIdSindicato(null);
+    }
+  };
+
   const addDelegacion = async (data) => {
     try {
       const response = await fetch("/api/opticas/addDelegacion", {
@@ -213,6 +251,42 @@ const OpticaPage = () => {
       toast.success("Delegación agregada exitosamente");
     } catch (error) {
       toast.error(error.message || "Error al agregar la delegación");
+    }
+  };
+
+  const removeDelegacion = async (data) => {
+    try {
+      const confirm = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "¿Estás seguro de remover esta delegación?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, remover",
+        cancelButtonText: "No, cancelar",
+      });
+      if (!confirm.isConfirmed) return;
+      setIdDelegacion(data.idDelegacion);
+      const response = await fetch("/api/opticas/removeDelegacion", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...data, id }),
+      });
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error.split(":")[1].trim());
+      }
+      await getOpticas();
+      await getOptica();
+      setIsAddSindicatoFormOpen(false);
+      toast.success("Delegación removido exitosamente");
+    } catch (error) {
+      toast.error(error.message || "Error al remover la delagación");
+    } finally {
+      setIdDelegacion(null);
     }
   };
 
@@ -444,8 +518,16 @@ const OpticaPage = () => {
                 className="inline-flex items-center gap-x-1.5 py-1.5 ps-3 pe-2 rounded-md text-xs font-medium bg-slate-100 text-slate-700 "
               >
                 <span>{s.nombre}</span>
-                <Button type="cancel-outline">
-                  <X className="size-4" />
+                <Button
+                  type="cancel-outline"
+                  onClick={() => removeSindicato({ idSindicato: s.id })}
+                  disabled={idSindicato == s.id}
+                >
+                  {!idSindicato || idSindicato != s.id ? (
+                    <X className="size-4" />
+                  ) : (
+                    <Loader className="size-4 animate-spin" />
+                  )}
                 </Button>
               </li>
             ))}
@@ -532,9 +614,28 @@ const OpticaPage = () => {
         {optica?.delegaciones && optica.delegaciones.length === 0 ? (
           <p className="text-gray-500">No hay delegaciones agregadas</p>
         ) : (
-          <ul className="list-disc pl-5 space-y-2">
+          <ul
+            className={`list-none gap-2 flex flex-col ${
+              optica?.delegaciones.length > 1
+                ? "divide-y-4 divide-slate-100"
+                : ""
+            }`}
+          >
             {optica?.delegaciones?.map((d) => (
-              <li key={d.id} className="text-gray-700">
+              <li key={d.id} className="flex flex-1 gap-2 items-center pb-2">
+                <Button
+                  type="cancel"
+                  onClick={() => removeDelegacion({ idDelegacion: d.id })}
+                  disabled={idDelegacion === d.id}
+                >
+                  {(!idDelegacion || idDelegacion !== d.id) && (
+                    <X className="size-4" />
+                  )}
+
+                  {idDelegacion === d.id && (
+                    <Loader className="size-4 animate-spin" />
+                  )}
+                </Button>
                 <span>
                   {d.provincia} - {d.localidad}
                 </span>

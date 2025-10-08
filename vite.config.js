@@ -7,6 +7,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
+      "/arg": {
+        target: "https://apis.datos.gob.ar/georef/api",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/arg/, ""),
+      },
       "/api": {
         target: import.meta?.env?.VITE_API_URL || "http://localhost:3000",
         changeOrigin: true,
@@ -17,7 +22,7 @@ export default defineConfig({
           import.meta?.env?.VITE_API_BACKUP ||
           "https://backup-xnwm.onrender.com",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (path) => path.replace(/^\/back/, ""),
       },
     },
   },

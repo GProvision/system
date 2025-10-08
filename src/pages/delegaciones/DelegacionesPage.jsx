@@ -43,9 +43,7 @@ const DelegacionesPage = () => {
   };
 
   const getProvincias = async () => {
-    const response = await fetch(
-      "https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre&max=100"
-    );
+    const response = await fetch("/arg/provincias?campos=id,nombre&max=100");
     const data = await response.json();
     setProvincias(
       data.provincias.sort((a, b) => a.nombre.localeCompare(b.nombre))
@@ -60,7 +58,7 @@ const DelegacionesPage = () => {
   useEffect(() => {
     const getLocalidades = async () => {
       const response = await fetch(
-        `https://apis.datos.gob.ar/georef/api/localidades?provincia=${provinciaId}&campos=id,nombre&max=1000`
+        `/arg/localidades?provincia=${provinciaId}&campos=id,nombre&max=1000`
       );
       const data = await response.json();
       setLocalidades(
