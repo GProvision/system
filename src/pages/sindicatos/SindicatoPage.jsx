@@ -234,7 +234,7 @@ const SindicatoPage = () => {
               </div>
             </fieldset>
             <Button
-              type="submit"
+              type={!isSubmitting ? "add" : "default"}
               disabled={isSubmitting}
               onClick={handleSubmit(editSindicato)}
             >
