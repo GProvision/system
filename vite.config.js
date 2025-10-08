@@ -12,6 +12,13 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      "/back": {
+        target:
+          import.meta?.env?.VITE_API_BACKUP ||
+          "https://backup-xnwm.onrender.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
     },
   },
 });
