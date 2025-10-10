@@ -140,9 +140,9 @@ const Formulario = ({ onClose, onSuccess }) => {
             })
         ]);
 
-        setMateriales(materialesRes);
-        setTiposArmazon(tiposRes);
-        setUbicaciones(ubicacionesRes);
+        setMateriales([...new Set(materialesRes)]);
+        setTiposArmazon([...new Set(tiposRes)]);
+        setUbicaciones([...new Set(ubicacionesRes)]);
       } catch (err) {
         console.error('Error cargando datos:', err);
         setError(err.message);
