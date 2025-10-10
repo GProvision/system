@@ -5,7 +5,6 @@ import Formulario from "../../components/armazones/Formulario";
 const ArmazonesPage = () => {
   return <>
   <Tabla />
-  
   </>;
 };
 

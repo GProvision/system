@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import Formulario from "./Formulario";
-import { Loader } from "lucide-react";
+import { Loader, Plus, Minus } from "lucide-react";
 
 const Tabla = () => {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [armazones, setArmazones] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const getArmazones = async () => {
     try {
+      setLoading(true);
       // const response = await fetch("/api/armazones");
       const res = await new Promise((resolve) =>
         setTimeout(
@@ -58,6 +61,8 @@ const Tabla = () => {
       setArmazones(res || []);
     } catch (error) {
       console.error("Error al obtener los armazones:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +74,7 @@ const Tabla = () => {
     getArmazones();
   }, []);
 
-  if (armazones.length === 0) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader className="animate-spin text-gray-500" size={48} />
@@ -84,18 +89,22 @@ const Tabla = () => {
         <h1 className="text-2xl font-bold text-black">
           Inventario de Armazones
         </h1>
-        <button
+<button
           onClick={toggleFormulario}
           className={`${
             mostrarFormulario
               ? "bg-red-600 hover:bg-red-700"
               : "bg-blue-600 hover:bg-blue-700"
-          } text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+          } text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
           aria-label={
             mostrarFormulario ? "Cerrar formulario" : "Agregar nuevo armazón"
           }
         >
-          {mostrarFormulario ? "−" : "+"}
+          {mostrarFormulario ? (
+            <Minus className="h-5 w-5" />
+          ) : (
+            <Plus className="h-5 w-5" />
+          )}
         </button>
       </header>
 
@@ -106,101 +115,87 @@ const Tabla = () => {
             onClose={toggleFormulario}
             onSuccess={() => {
               toggleFormulario();
-              // Aquí podrías recargar los datos de la tabla
+              getArmazones(); // Recargar los datos después de agregar uno nuevo
             }}
           />
         </div>
       )}
 
-      {/* Contenedor principal de la tabla */}
-      <article className="w-full">
-        {/* Encabezados de columnas */}
-        <section className="grid grid-cols-10 gap-2 bg-gray-50 px-6 py-3 border-b border-gray-200">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            C. Patilla
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            C. Interno
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            C. Color
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            L. Color
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Tipo
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Material
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Ubicacion
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Cantidad
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Costo
-          </span>
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            P. Venta
-          </span>
-        </section>
-
-        {/* Filas de datos */}
-        {armazones.map((armazon) => (
-          <article
-            key={armazon.id}
-            className="grid grid-cols-10 gap-2 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
-          >
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900 font-medium">
-                {armazon.codigoPatilla}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900">
-                {armazon.codigoInterno}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900">
-                {armazon.codigoColor}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900">
-                {armazon.lineaColor}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900">{armazon.tipo}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900">{armazon.material}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900">{armazon.ubicacion}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-900 font-semibold">
-                {armazon.cantidad}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-700">
-                ${armazon.costo.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-semibold text-green-600">
-                ${armazon.precioVenta.toFixed(2)}
-              </span>
-            </div>
-          </article>
-        ))}
-      </article>
+      {/* Tabla con etiquetas HTML table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                C. Patilla
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                C. Interno
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                C. Color
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                L. Color
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tipo
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Material
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ubicacion
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cantidad
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Costo
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                P. Venta
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {armazones.map((armazon) => (
+              <tr key={armazon.id} className="hover:bg-gray-50 transition-colors duration-200">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.codigoPatilla}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.codigoInterno}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.codigoColor}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.lineaColor}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.tipo}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.material}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {armazon.ubicacion}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                  {armazon.cantidad}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  ${armazon.costo.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                  ${armazon.precioVenta.toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 };

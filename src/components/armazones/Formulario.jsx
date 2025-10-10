@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
+const Formulario = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     codigoPatilla: '',
     codigoInterno: '',
@@ -16,6 +16,52 @@ const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
     costo: 0.00,
     precioVenta: 0.00
   });
+
+  const [materiales, setMateriales] = useState([]);
+  const [tiposArmazon, setTiposArmazon] = useState([]);
+  const [ubicaciones, setUbicaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Cargar datos desde las APIs
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [materialesRes, tiposRes, ubicacionesRes] = await Promise.all([
+          fetch('/back/tipos/materiales').then(res => {
+            if (!res.ok) throw new Error('Error al cargar materiales');
+            return res.json();
+          }),
+          fetch('/back/tipos/armazones').then(res => {
+            if (!res.ok) throw new Error('Error al cargar tipos de armazón');
+            return res.json();
+          }),
+          fetch('/back/tipos/ubicaciones').then(res => {
+            if (!res.ok) throw new Error('Error al cargar ubicaciones');
+            return res.json();
+          })
+        ]);
+
+        setMateriales([...new Set(materialesRes.map(({descripcion}) => descripcion))]);
+        setTiposArmazon([...new Set(tiposRes.map(({descripcion}) => descripcion))]);
+        setUbicaciones([...new Set(ubicacionesRes.map(({descripcion}) => descripcion))]);
+      } catch (err) {
+        console.error('Error cargando datos:', err);
+        setError(err.message);
+        // Datos por defecto en caso de error
+        setMateriales([]);
+        setTiposArmazon([]);
+        setUbicaciones([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -57,9 +103,19 @@ const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
     });
   };
 
-  const materiales = ['Acetato', 'Metal', 'Plástico', 'Titanio', 'Mixed', 'Flexible'];
-  const tiposArmazon = ['Ovalado', 'Rectangular', 'Redondo', 'Geométrico', 'Aviador', 'Mariposa', 'Deportivo'];
-  const ubicaciones = ['Estante A', 'Estante B', 'Estante C', 'Estante D', 'Caja 1', 'Caja 2', 'Mostrador'];
+  // Mostrar loading mientras se cargan los datos
+  if (loading) {
+    return (
+      <section className="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
+        <header className="bg-white px-6 py-4 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-black">Nuevo Armazón</h1>
+        </header>
+        <div className="p-6 flex justify-center items-center h-32">
+          <div className="text-gray-500">Cargando opciones...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
@@ -68,16 +124,24 @@ const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
         <h1 className="text-2xl font-bold text-black">
           Nuevo Armazón
         </h1>
-        {onClose && ( // Solo mostrar el botón de cerrar si onClose está definido
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-            aria-label="Cerrar formulario"
-          >
-            ×
-          </button>
-        )}
       </header>
+
+      {error && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-6 mt-4">
+          <div className="flex">
+            <div className="text-yellow-400">
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                {error}. Se están utilizando datos por defecto.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="p-6">
         {/* Primera fila - Códigos principales */}
@@ -144,7 +208,7 @@ const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
           />
         </div>
 
-        {/* Segunda fila - Características */}
+        {/* Segunda fila - Características con datalist */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -164,54 +228,63 @@ const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Tipo de Armazón *
             </label>
-            <select
+            <input
+              type="text"
               name="tipoArmazon"
               value={formData.tipoArmazon}
               onChange={handleChange}
+              list="tiposArmazon"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Seleccionar tipo</option>
-              {tiposArmazon.map(tipo => (
-                <option key={tipo} value={tipo}>{tipo}</option>
+              placeholder="Selecciona o escribe un tipo"
+            />
+            <datalist id="tiposArmazon">
+              {tiposArmazon.map((tipo) => (
+                <option key={tipo} value={tipo} />
               ))}
-            </select>
+            </datalist>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Material *
             </label>
-            <select
+            <input
+              type="text"
               name="material"
               value={formData.material}
               onChange={handleChange}
+              list="materiales"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Seleccionar material</option>
-              {materiales.map(material => (
-                <option key={material} value={material}>{material}</option>
+              placeholder="Selecciona o escribe un material"
+            />
+            <datalist id="materiales">
+              {materiales.map((material) => (
+                <option key={material} value={material} />
               ))}
-            </select>
+            </datalist>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Ubicación *
             </label>
-            <select
+            <input
+              type="text"
               name="ubicacion"
               value={formData.ubicacion}
               onChange={handleChange}
+              list="ubicaciones"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Seleccionar ubicación</option>
-              {ubicaciones.map(ubicacion => (
-                <option key={ubicacion} value={ubicacion}>{ubicacion}</option>
+              placeholder="Selecciona o escribe una ubicación"
+            />
+            <datalist id="ubicaciones">
+              {ubicaciones.map((ubicacion) => (
+                <option key={ubicacion} value={ubicacion} />
               ))}
-            </select>
+            </datalist>
           </div>
         </div>
 
@@ -293,17 +366,7 @@ const Formulario = ({ onClose, onSuccess }) => { // Añadir props aquí
         </div>
 
         {/* Botones */}
-        <div className="flex justify-between space-x-4 pt-4 border-t border-gray-200">
-          {onClose && ( // Solo mostrar cancelar si onClose está definido
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Cancelar
-            </button>
-          )}
-          
+        <div className="flex justify-center space-x-4 pt-4 border-t border-gray-200">
           <div className="flex space-x-4">
             <button
               type="button"
