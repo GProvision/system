@@ -140,7 +140,7 @@ const SindicatoPage = () => {
         </h1>
         <div className="flex items-center gap-2">
           <Button
-            type={isEditFormOpen ? "cancel" : "edit"}
+            style={isEditFormOpen ? "cancel" : "edit"}
             onClick={() => setIsEditFormOpen(!isEditFormOpen)}
           >
             {!isEditFormOpen ? (
@@ -234,7 +234,7 @@ const SindicatoPage = () => {
               </div>
             </fieldset>
             <Button
-              type={!isSubmitting ? "add" : "default"}
+              style={!isSubmitting ? "add" : "default"}
               disabled={isSubmitting}
               onClick={handleSubmit(editSindicato)}
             >

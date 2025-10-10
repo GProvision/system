@@ -12,6 +12,8 @@ import ArmazonPage from "./pages/armazones/ArmazonPage";
 import ArmazonStockPage from "./pages/armazones/ArmazonStockPage";
 import OpticasPage from "./pages/opticas/OpticasPage";
 import OpticaPage from "./pages/opticas/OpticaPage";
+import UsuariosPage from "./pages/usuarios/UsuariosPage";
+import UsuarioPage from "./pages/usuarios/UsuarioPage";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -146,6 +148,20 @@ const routes = createBrowserRouter([
           {
             path: ":id",
             element: <OpticaPage />,
+          },
+        ],
+      },
+      {
+        path: "usuarios",
+        element: <Autenticados />,
+        children: [
+          {
+            index: true,
+            element: <UsuariosPage />,
+          },
+          {
+            path: ":id",
+            element: <UsuarioPage />,
           },
         ],
       },

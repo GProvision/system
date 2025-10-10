@@ -34,7 +34,7 @@ const Autenticados = () => {
   return (
     <>
       <Header />
-      <main>
+      <main className="min-h-[calc(100dvh-8rem)]">
         <Outlet />
       </main>
       <Footer />

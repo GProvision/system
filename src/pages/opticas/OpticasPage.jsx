@@ -79,7 +79,7 @@ const OpticasPage = () => {
         <h1 className="text-2xl font-bold text-gray-900">Opticas</h1>
         <Button
           onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-          type={!isAddFormOpen ? "add" : "cancel"}
+          style={!isAddFormOpen ? "add" : "cancel"}
         >
           {!isAddFormOpen ? (
             <Plus className="size-4" />

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { X, Save, Pen, Info, ChevronLeft, Trash2, Loader } from "lucide-react";
+import { X, Save, Pen, ChevronLeft, Trash2, Loader } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 import Button from "../../components/shared/Button";
@@ -15,6 +15,7 @@ const DelegacionPage = () => {
   const [provincias, setProvincias] = useState([]);
   const [localidades, setLocalidades] = useState([]);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -124,6 +125,42 @@ const DelegacionPage = () => {
       toast.error(error);
     }
   };
+  const removeDelegacion = async () => {
+    const confirmResult = await Swal.fire({
+      title: "¿Está seguro?",
+      text: "Se eliminara la delegación con todos los datos asociados.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, editar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+    try {
+      setIsDeleting(true);
+      const response = await fetch("/api/delegaciones/remove", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idDelegacion: id }),
+      });
+      if (response.ok) {
+        navigate("/delegaciones");
+        toast.success("Delegacion eliminada exitosamente");
+      } else {
+        const { error } = await response.json();
+        throw new Error(error);
+      }
+    } catch (error) {
+      toast.error(error);
+    } finally {
+      setIsDeleting(true);
+    }
+  };
 
   useEffect(() => {
     getDelegacion();
@@ -163,7 +200,7 @@ const DelegacionPage = () => {
         </h1>
         <div className="flex items-center gap-2">
           <Button
-            type={!isEditFormOpen ? "edit" : "cancel"}
+            style={!isEditFormOpen ? "edit" : "cancel"}
             onClick={() => setIsEditFormOpen(!isEditFormOpen)}
           >
             {!isEditFormOpen ? (
@@ -173,8 +210,12 @@ const DelegacionPage = () => {
             )}
           </Button>
           {!delegacion.activo && (
-            <Button type="cancel" onClick={() => console.log("Eliminar")}>
-              <Trash2 className="size-4" />
+            <Button style="cancel" onClick={() => removeDelegacion()}>
+              {!isDeleting ? (
+                <Trash2 className="size-4" />
+              ) : (
+                <Loader className="animate-spin size-4" />
+              )}
             </Button>
           )}
         </div>

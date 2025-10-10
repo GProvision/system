@@ -107,7 +107,7 @@ const DelegacionesPage = () => {
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-900">Delegaciones</h1>
         <Button
-          type={!isAddFormOpen ? "add" : "cancel"}
+          style={!isAddFormOpen ? "add" : "cancel"}
           onClick={() => setIsAddFormOpen(!isAddFormOpen)}
         >
           {!isAddFormOpen ? (
@@ -197,7 +197,7 @@ const DelegacionesPage = () => {
               </select>
             </fieldset>
             <Button
-              type="add"
+              style="add"
               onClick={handleSubmit(addDelegacion)}
               disabled={isSubmitting}
             >
@@ -249,7 +249,7 @@ const DelegacionesPage = () => {
           </table>
           <form className="flex justify-center items-center gap-2">
             <Button
-              type="default-outline"
+              style="default-outline"
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
             >
@@ -257,7 +257,7 @@ const DelegacionesPage = () => {
             </Button>
             <output>{page}</output>
             <Button
-              type="default-outline"
+              style="default-outline"
               onClick={() => setPage(page + 1)}
               disabled={
                 page ===

@@ -335,7 +335,7 @@ const OpticaPage = () => {
         </h1>
         <Button
           onClick={() => setIsEditFormOpen(!isEditFormOpen)}
-          type={!isEditFormOpen ? "edit" : "cancel"}
+          style={!isEditFormOpen ? "edit" : "cancel"}
           aria-label={!isEditFormOpen ? "Editar óptica" : "Cancelar edición"}
           aria-expanded={isEditFormOpen}
         >
@@ -413,7 +413,7 @@ const OpticaPage = () => {
             </div>
 
             <Button
-              type={isSubmitting ? "cancel" : "add"}
+              style={isSubmitting ? "cancel" : "add"}
               disabled={isSubmitting}
               onClick={handleSubmit(editOptica)}
               aria-label={
@@ -473,7 +473,7 @@ const OpticaPage = () => {
                   )}
                 </div>
                 <Button
-                  type={
+                  style={
                     !addSindicatoForm.formState.isSubmitting ? "add" : "default"
                   }
                   disabled={addSindicatoForm.formState.isSubmitting}
@@ -493,7 +493,7 @@ const OpticaPage = () => {
             )}
             <Button
               onClick={() => setIsAddSindicatoFormOpen(!isAddSindicatoFormOpen)}
-              type={!isAddSindicatoFormOpen ? "add" : "cancel"}
+              style={!isAddSindicatoFormOpen ? "add" : "cancel"}
               aria-label={
                 !isAddSindicatoFormOpen ? "Agregar sindicato" : "Cancelar"
               }
@@ -519,7 +519,7 @@ const OpticaPage = () => {
               >
                 <span>{s.nombre}</span>
                 <Button
-                  type="cancel-outline"
+                  style="cancel-outline"
                   onClick={() => removeSindicato({ idSindicato: s.id })}
                   disabled={idSindicato == s.id}
                 >
@@ -572,7 +572,7 @@ const OpticaPage = () => {
                   )}
                 </div>
                 <Button
-                  type={
+                  style={
                     !addDelegacionForm.formState.isSubmitting
                       ? "add"
                       : "default"
@@ -596,7 +596,7 @@ const OpticaPage = () => {
               onClick={() =>
                 setIsAddDelegacionFormOpen(!isAddDelegacionFormOpen)
               }
-              type={!isAddDelegacionFormOpen ? "add" : "cancel"}
+              style={!isAddDelegacionFormOpen ? "add" : "cancel"}
               aria-label={
                 !isAddDelegacionFormOpen ? "Agregar Delegacion" : "Cancelar"
               }

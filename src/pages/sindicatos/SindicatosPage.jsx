@@ -83,7 +83,7 @@ const SindicatosPage = () => {
         <h1 className="text-2xl font-bold text-gray-900">Sindicatos</h1>
         <Button
           onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-          type={!isAddFormOpen ? "add" : "cancel"}
+          style={!isAddFormOpen ? "add" : "cancel"}
         >
           {!isAddFormOpen ? (
             <Plus className="size-4 text-blue-50" />
