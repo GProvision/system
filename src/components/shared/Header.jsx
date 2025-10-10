@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
-import useUser from '../../context/useUser';
-import path from '../../path';
-import { MenuIcon, XIcon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+import useUser from "../../context/useUser";
+import path from "../../path";
+import { MenuIcon, XIcon } from "lucide-react";
 
 const Header = () => {
   const { user, logout } = useUser();
@@ -22,8 +22,8 @@ const Header = () => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Close menu when clicking outside
@@ -34,8 +34,8 @@ const Header = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close menu when route changes
@@ -46,36 +46,35 @@ const Header = () => {
   // Handle logout
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   // Get routes for current user role
   const userRoutes = user?.rol?.nombre ? path[user.rol.nombre] || [] : [];
-  const mainRoutes = userRoutes.filter(route => route.principal);
+  const mainRoutes = userRoutes.filter((route) => route.principal);
 
   if (!user) return null;
 
   return (
-    <header 
-      className="bg-white shadow-md" 
+    <header
+      className="bg-white shadow-md"
       role="banner"
       aria-label="Navegación principal"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link 
-              to="/" 
+            <span
               className="text-xl font-bold text-gray-800"
               aria-label="Ir al inicio"
             >
               GProvisión
-            </Link>
+            </span>
           </div>
 
           {/* Desktop Navigation */}
-          <nav 
-            className="hidden md:flex items-center space-x-8" 
+          <nav
+            className="hidden md:flex items-center space-x-8"
             aria-label="Navegación principal"
           >
             {mainRoutes.map((route) => (
@@ -84,10 +83,12 @@ const Header = () => {
                 to={route.path}
                 className={`px-3 py-2 rounded-md text-sm font-medium ${
                   location.pathname === route.path
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
-                aria-current={location.pathname === route.path ? 'page' : undefined}
+                aria-current={
+                  location.pathname === route.path ? "page" : undefined
+                }
               >
                 {route.alias}
               </Link>
@@ -128,7 +129,7 @@ const Header = () => {
 
       {/* Mobile menu */}
       {isMobile && isMenuOpen && (
-        <div 
+        <div
           ref={menuRef}
           className="md:hidden bg-white shadow-lg rounded-b-md"
           role="menu"
@@ -142,12 +143,14 @@ const Header = () => {
                 to={route.path}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   location.pathname === route.path
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
                 role="menuitem"
                 tabIndex="0"
-                aria-current={location.pathname === route.path ? 'page' : undefined}
+                aria-current={
+                  location.pathname === route.path ? "page" : undefined
+                }
               >
                 {route.alias}
               </Link>
@@ -173,4 +176,3 @@ const Header = () => {
 };
 
 export default Header;
-
