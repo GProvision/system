@@ -6,14 +6,12 @@ import SindicatosPage from "./pages/sindicatos/SindicatosPage";
 import SindicatoPage from "./pages/sindicatos/SindicatoPage";
 import DelegacionesPage from "./pages/delegaciones/DelegacionesPage";
 import DelegacionPage from "./pages/delegaciones/DelegacionPage";
-import DelegacionOpticaPage from "./pages/delegaciones/DelegacionOpticaPage";
 import ArmazonesPage from "./pages/armazones/ArmazonesPage";
 import ArmazonPage from "./pages/armazones/ArmazonPage";
-import ArmazonStockPage from "./pages/armazones/ArmazonStockPage";
+// import ArmazonStockPage from "./pages/armazones/ArmazonStockPage";
 import OpticasPage from "./pages/opticas/OpticasPage";
 import OpticaPage from "./pages/opticas/OpticaPage";
 import UsuariosPage from "./pages/usuarios/UsuariosPage";
-import UsuarioPage from "./pages/usuarios/UsuarioPage";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -106,10 +104,6 @@ const routes = createBrowserRouter([
                 index: true,
                 element: <DelegacionPage />,
               },
-              {
-                path: ":optica",
-                element: <DelegacionOpticaPage />,
-              },
             ],
           },
         ],
@@ -129,10 +123,10 @@ const routes = createBrowserRouter([
                 index: true,
                 element: <ArmazonPage />,
               },
-              {
-                path: "stock",
-                element: <ArmazonStockPage />,
-              },
+              // {
+              //   path: "stock",
+              //   element: <ArmazonStockPage />,
+              // },
             ],
           },
         ],
@@ -158,10 +152,6 @@ const routes = createBrowserRouter([
           {
             index: true,
             element: <UsuariosPage />,
-          },
-          {
-            path: ":id",
-            element: <UsuarioPage />,
           },
         ],
       },
