@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 
 const UsuariosPage = () => {
@@ -28,7 +27,7 @@ const UsuariosPage = () => {
   const [selectUser, setSelectUser] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [userEdit, setUserEdit] = useState(null);
-  const navigate = useNavigate();
+
   const addForm = useForm({
     resolver: zodResolver(
       z.object({
