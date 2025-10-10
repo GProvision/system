@@ -259,7 +259,11 @@ const UsuariosPage = () => {
     }
   }, [isAddFormOpen]);
   if (isLoadingUsers || isLoadingRoles)
-    return <Loader className="animate-spin size-4 mx-auto" />;
+    return (
+      <div className="h-100 flex flex-col items-center justify-center">
+        <Loader className="animate-spin size-6 mx-auto" />
+      </div>
+    );
   return (
     <section className="container mx-auto px-4 py-8 max-w-6xl">
       <header className="flex justify-between items-center mb-4">
