@@ -1,4 +1,5 @@
 import {
+  Check,
   Loader,
   Plus,
   Save,
@@ -218,12 +219,23 @@ const UsuariosPage = () => {
     setIsEditOpen(true);
   };
 
-  const handleUpdateUser = async (data) => {
+  const editUser = async (data) => {
+    const confirm = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: `¿Estás seguro de modificar este usuario?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Sí, modificar`,
+      cancelButtonText: "Cancelar",
+    });
+    if (!confirm.isConfirmed) return;
     try {
       const response = await fetch(`/api/usuarios/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, id: userEdit.id }),
       });
       if (!response.ok) {
         const { error } = await response.json();
@@ -445,12 +457,16 @@ const UsuariosPage = () => {
                 <dd className="text-xl font-medium text-slate-900">
                   {u.nombre}
                 </dd>
+                <dt className="sr-only">Usuario</dt>
+                <dd className="text-sm font-medium text-slate-900">
+                  {u.usuario}
+                </dd>
                 <dt className="sr-only">Rol</dt>
                 <dd className="text-sm uppercase text-slate-500">
                   {u.rol.nombre}
                 </dd>
               </dl>
-              <div class="flex justify-end p-4 gap-2">
+              <div className="flex justify-end p-4 gap-2">
                 <Button style="edit-outline" onClick={() => handleEdit(u)}>
                   <UserRoundPen className="size-4" />
                 </Button>
@@ -467,16 +483,30 @@ const UsuariosPage = () => {
                   }
                   onClick={() => setActive(u.id, !u.activo)}
                 >
-                  {!selectUser && u.activo && <UserRoundX className="size-4" />}
-                  {!selectUser && !u.activo && (
+                  {(!selectUser || selectUser != u.id) && u.activo && (
+                    <UserRoundX className="size-4" />
+                  )}
+                  {(!selectUser || selectUser != u.id) && !u.activo && (
                     <UserRoundCheck className="size-4" />
                   )}
-                  {selectUser && <Loader className="size-4 animate-spin" />}
+                  {selectUser && selectUser == u.id && (
+                    <Loader className="size-4 animate-spin" />
+                  )}
                 </Button>
               </div>
             </li>
           ))}
         </ul>
+      )}
+      {userEdit && (
+        <EditarUsuarioModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          onSubmit={editUser}
+          usuario={userEdit}
+          usuarios={usuarios.filter(({ id }) => userEdit.id != id)}
+          roles={roles}
+        />
       )}
     </section>
   );
@@ -500,20 +530,6 @@ const EditarUsuarioModal = ({
         },
         { message: "El nombre es obligatorio, minimo 3 caracteres" }
       ),
-    clave: z
-      .string()
-      .refine((val) => val.replace(/\s+/g, " ").length > 8, {
-        message: "Minimo 8 caracteres",
-      })
-      .refine((val) => /[A-Z]/.test(val), {
-        message: "Debe tener 1 mayuscula",
-      })
-      .refine((val) => /[0-9]/.test(val), {
-        message: "Debe tener al menos 1 numero",
-      })
-      .refine((val) => /[!@#$%^&*]/.test(val), {
-        message: "Debe contener un caracter especial",
-      }),
     usuario: z
       .string()
       .refine((val) => val.replace(/\s+/g, " ").length > 8, {
@@ -537,21 +553,27 @@ const EditarUsuarioModal = ({
     },
   });
 
+  useEffect(() => {
+    if (usuario) {
+      form.setValue("nombre", usuario?.nombre);
+      form.setValue("usuario", usuario?.usuario);
+      form.setValue("rolId", usuario?.rol.id);
+    }
+  }, [usuario]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-        >
-          <X className="size-5" />
-        </button>
-
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Editar Usuario
-        </h2>
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4">
+        <header className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Editar Usuario
+          </h2>
+          <Button onClick={onClose} style="cancel">
+            <X className="size-4" />
+          </Button>
+        </header>
 
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -639,17 +661,17 @@ const EditarUsuarioModal = ({
           </div>
 
           {/* BOTONES */}
-          <div className="flex justify-end gap-3 mt-4">
-            <Button type="cancel" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
+          <div className="flex justify-center gap-3 mt-4">
+            <Button
+              type="submit"
+              style="check"
+              disabled={form.formState.isSubmitting}
+            >
               {form.formState.isSubmitting ? (
                 <Loader className="size-4 animate-spin" />
               ) : (
-                <Save className="size-4" />
+                <Check className="size-4" />
               )}
-              Guardar
             </Button>
           </div>
         </form>
