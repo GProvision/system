@@ -12,6 +12,7 @@ import ArmazonPage from "./pages/armazones/ArmazonPage";
 import OpticasPage from "./pages/opticas/OpticasPage";
 import OpticaPage from "./pages/opticas/OpticaPage";
 import UsuariosPage from "./pages/usuarios/UsuariosPage";
+import AdminsPage from "./pages/roles/AdminsPage";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -36,7 +37,7 @@ const routes = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <h1>Administradores</h1>,
+            element: <AdminsPage />,
           },
         ],
       },
