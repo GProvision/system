@@ -3,24 +3,29 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader, Save, X } from 'lucide-react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Esquema de validación con Zod
 const formSchema = z.object({
   codigoPatilla: z.string()
     .min(1, 'El código patilla es requerido')
-    .max(20, 'El código patilla no puede tener más de 20 caracteres'),
+    .max(20, 'El código patilla no puede tener más de 20 caracteres')
+    .regex(/^[a-zA-Z0-9]+$/, 'El código patilla debe ser alfanumérico y no contener espacios'),
 
   codigoInterno: z.string()
     .min(1, 'El código interno es requerido')
-    .max(20, 'El código interno no puede tener más de 20 caracteres'),
+    .max(20, 'El código interno no puede tener más de 20 caracteres')
+    .regex(/^[a-zA-Z0-9]+$/, 'El código interno debe ser alfanumérico y no contener espacios'),
+
+  codigoColor: z.string()
+    .min(1, 'El código color es requerido')
+    .max(20, 'El código color no puede tener más de 20 caracteres')
+    .regex(/^[a-zA-Z0-9]+$/, 'El código color debe ser alfanumérico y no contener espacios'),
 
   descripcion: z.string()
     .min(1, 'La descripción es requerida')
     .max(500, 'La descripción no puede tener más de 500 caracteres'),
-
-  codigoColor: z.string()
-    .min(1, 'El código color es requerido')
-    .max(20, 'El código color no puede tener más de 20 caracteres'),
 
   letraColor: z.string()
     .max(10, 'La letra color no puede tener más de 10 caracteres')
@@ -28,41 +33,55 @@ const formSchema = z.object({
 
   tipoArmazon: z.string()
     .min(1, 'El tipo de armazón es requerido')
-    .max(50, 'El tipo de armazón no puede tener más de 50 caracteres'),
+    .max(50, 'El tipo de armazón no puede tener más de 50 caracteres')
+    .regex(/^\S+$/, 'El tipo de armazón no puede contener espacios'),
 
   material: z.string()
     .min(1, 'El material es requerido')
-    .max(50, 'El material no puede tener más de 50 caracteres'),
+    .max(50, 'El material no puede tener más de 50 caracteres')
+    .regex(/^\S+$/, 'El material no puede contener espacios'),
 
   ubicacion: z.string()
     .min(1, 'La ubicación es requerida')
     .max(50, 'La ubicación no puede tener más de 50 caracteres'),
 
   cantidad: z.preprocess(
-    (val) => Number(val),
+    (val) => {
+      if (val === '' || val === null || val === undefined) return 0;
+      return Number(val);
+    },
     z.number()
-      .min(0, 'La cantidad no puede ser negativa')
+      .min(1, 'La cantidad debe ser mayor a 0')
       .int('La cantidad debe ser un número entero')
   ),
 
   cantidadMinima: z.preprocess(
-    (val) => Number(val),
+    (val) => {
+      if (val === '' || val === null || val === undefined) return 0;
+      return Number(val);
+    },
     z.number()
-      .min(0, 'La cantidad mínima no puede ser negativa')
+      .min(1, 'La cantidad mínima debe ser mayor a 0')
       .int('La cantidad mínima debe ser un número entero')
   ),
 
   costo: z.preprocess(
-    (val) => Number(val),
+    (val) => {
+      if (val === '' || val === null || val === undefined) return 0;
+      return Number(val);
+    },
     z.number()
-      .min(0, 'El costo no puede ser negativo')
+      .min(0.01, 'El costo debe ser mayor a 0')
       .max(999999.99, 'El costo no puede ser mayor a 999,999.99')
   ),
 
   precioVenta: z.preprocess(
-    (val) => Number(val),
+    (val) => {
+      if (val === '' || val === null || val === undefined) return 0;
+      return Number(val);
+    },
     z.number()
-      .min(0, 'El precio de venta no puede ser negativo')
+      .min(0.01, 'El precio de venta debe ser mayor a 0')
       .max(999999.99, 'El precio de venta no puede ser mayor a 999,999.99')
   ),
 
@@ -79,6 +98,7 @@ const Formulario = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitError, setSubmitError] = useState(null);
+  const [verificandoDuplicados, setVerificandoDuplicados] = useState(false);
 
   // Configuración de react-hook-form
   const {
@@ -87,16 +107,116 @@ const Formulario = ({ onClose, onSuccess }) => {
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    watch,
+    getValues,
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cantidad: 0,
-      cantidadMinima: 2,
-      costo: 0.00,
-      precioVenta: 0.00,
+      cantidad: 1,
+      cantidadMinima: 1,
+      costo: 0.01,
+      precioVenta: 0.01,
       activo: true
     }
   });
+
+  // Función para verificar duplicados
+  const verificarDuplicados = async (codigoPatilla, codigoInterno, codigoColor) => {
+    try {
+      setVerificandoDuplicados(true);
+      
+      // Hacer una búsqueda en la API para verificar duplicados
+      const response = await fetch(`/api/armazones/verificar-duplicados`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          codigoPatilla: codigoPatilla.toUpperCase(),
+          codigoInterno: codigoInterno.toUpperCase(),
+          codigoColor: codigoColor.toUpperCase()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al verificar duplicados');
+      }
+
+      const { esDuplicado, armazonExistente } = await response.json();
+      return { esDuplicado, armazonExistente };
+      
+    } catch (error) {
+      console.error('Error verificando duplicados:', error);
+      // Si hay error en la verificación, permitimos continuar pero mostramos advertencia
+      toast.warn('No se pudo verificar duplicados. Por favor, confirme manualmente.', {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      return { esDuplicado: false, armazonExistente: null };
+    } finally {
+      setVerificandoDuplicados(false);
+    }
+  };
+
+  // Función para verificar duplicados localmente (fallback)
+  const verificarDuplicadosLocalmente = async (codigoPatilla, codigoInterno, codigoColor) => {
+    try {
+      // Obtener todos los armazones existentes
+      const response = await fetch("/api/armazones/");
+      if (!response.ok) {
+        throw new Error('Error al obtener armazones existentes');
+      }
+      
+      const armazonesExistentes = await response.json();
+      const codigoPatillaUpper = codigoPatilla.toUpperCase();
+      const codigoInternoUpper = codigoInterno.toUpperCase();
+      const codigoColorUpper = codigoColor.toUpperCase();
+
+      // Buscar duplicados
+      const duplicado = armazonesExistentes.find(armazon => 
+        armazon.codigoPatilla.toUpperCase() === codigoPatillaUpper ||
+        armazon.codigoInterno.toUpperCase() === codigoInternoUpper ||
+        armazon.codigoColor.toUpperCase() === codigoColorUpper
+      );
+
+      return { 
+        esDuplicado: !!duplicado, 
+        armazonExistente: duplicado || null 
+      };
+    } catch (error) {
+      console.error('Error en verificación local:', error);
+      return { esDuplicado: false, armazonExistente: null };
+    }
+  };
+
+  // Función para prevenir la entrada de caracteres no numéricos
+  const handleNumericInput = (e) => {
+    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || 
+        e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+      return;
+    }
+
+    if (e.key === '.' && !e.target.value.includes('.')) {
+      return;
+    }
+
+    if (!/^\d$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  // Función para prevenir espacios en campos que no los permiten
+  const handleNoSpacesInput = (e) => {
+    if (e.key === ' ') {
+      e.preventDefault();
+    }
+  };
+
+  // Función para formatear campos alfanuméricos (uppercase y sin espacios)
+  const handleAlphanumericInput = (e, fieldName) => {
+    const value = e.target.value.toUpperCase().replace(/\s/g, '');
+    setValue(fieldName, value);
+  };
 
   // Cargar datos desde las APIs
   useEffect(() => {
@@ -158,57 +278,121 @@ const Formulario = ({ onClose, onSuccess }) => {
     fetchData();
   }, []);
 
-const onSubmit = async (data) => {
-  try {
-    setSubmitError(null);
-    
-    const armazonData = {
-      codigoPatilla: data.codigoPatilla,
-      codigoInterno: data.codigoInterno,
-      descripcion: data.descripcion,
-      codigoColor: data.codigoColor,
-      letraColor: data.letraColor,
-      tipoArmazon: data.tipoArmazon,
-      material: data.material,
-      ubicacion: data.ubicacion,
-      cantidad: data.cantidad,
-      cantidadMinima: data.cantidadMinima,
-      costo: parseFloat(data.costo),
-      precioVenta: parseFloat(data.precioVenta),
-      activo: data.activo
-    };
+  const onSubmit = async (data) => {
+    try {
+      setSubmitError(null);
+      
+      // Verificar duplicados antes de guardar
+      const { esDuplicado, armazonExistente } = await verificarDuplicados(
+        data.codigoPatilla, 
+        data.codigoInterno, 
+        data.codigoColor
+      );
 
-    console.log('Datos a enviar:', armazonData);
+      if (esDuplicado && armazonExistente) {
+        setSubmitError(`Ya existe un armazón con códigos similares:
+          - Código Patilla: ${armazonExistente.codigoPatilla}
+          - Código Interno: ${armazonExistente.codigoInterno}
+          - Código Color: ${armazonExistente.codigoColor}
+          
+          Por favor, utilice códigos únicos.`);
+        return;
+      }
 
-    // USAR LA MISMA ESTRATEGIA QUE PARA LOS DATOS DE LOS COMBOS
-    // Pero apuntando a tu API local en lugar del backup
-    const response = await fetch("/api/armazones", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(armazonData)
-    });
+      // Si no se pudo verificar correctamente, intentar verificación local
+      if (!esDuplicado && !armazonExistente) {
+        const resultadoLocal = await verificarDuplicadosLocalmente(
+          data.codigoPatilla, 
+          data.codigoInterno, 
+          data.codigoColor
+        );
+        
+        if (resultadoLocal.esDuplicado && resultadoLocal.armazonExistente) {
+          setSubmitError(`Posible duplicado detectado:
+            - Código Patilla: ${resultadoLocal.armazonExistente.codigoPatilla}
+            - Código Interno: ${resultadoLocal.armazonExistente.codigoInterno}
+            - Código Color: ${resultadoLocal.armazonExistente.codigoColor}
+            
+            Por favor, verifique los códigos antes de guardar.`);
+          return;
+        }
+      }
+      
+      const armazonData = {
+        codigoPatilla: data.codigoPatilla.toUpperCase(),
+        codigoInterno: data.codigoInterno.toUpperCase(),
+        descripcion: data.descripcion,
+        codigoColor: data.codigoColor.toUpperCase(),
+        letraColor: data.letraColor,
+        tipoArmazon: data.tipoArmazon,
+        material: data.material,
+        ubicacion: data.ubicacion,
+        cantidad: data.cantidad,
+        cantidadMinima: data.cantidadMinima,
+        costo: parseFloat(data.costo),
+        precioVenta: parseFloat(data.precioVenta),
+        activo: data.activo
+      };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error ${response.status}: ${errorText}`);
+      console.log('Datos a enviar:', armazonData);
+
+      const response = await fetch("/api/armazones", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(armazonData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        
+        // Verificar si el error es por duplicado
+        if (response.status === 409 || errorText.includes('duplicado') || errorText.includes('unique')) {
+          throw new Error('Ya existe un armazón con estos códigos. Por favor, utilice códigos únicos.');
+        }
+        
+        throw new Error(`Error ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Armazón creado exitosamente:', result);
+      
+      // Mostrar notificación de éxito
+      toast.success('¡Armazón creado exitosamente!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      
+      reset();
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+    } catch (error) {
+      console.error('Error al guardar el armazón:', error);
+      setSubmitError(error.message || 'Error al guardar el armazón. Por favor, intenta nuevamente.');
+      
+      // Mostrar notificación de error
+      toast.error('Error al crear el armazón', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
-
-    const result = await response.json();
-    console.log('Armazón creado exitosamente:', result);
-    
-    reset();
-    
-    if (onSuccess) {
-      onSuccess();
-    }
-    
-  } catch (error) {
-    console.error('Error al guardar el armazón:', error);
-    setSubmitError(error.message || 'Error al guardar el armazón. Por favor, intenta nuevamente.');
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -225,17 +409,6 @@ const onSubmit = async (data) => {
 
   return (
     <section className="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
-      <header className="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-black">Nuevo Armazón</h1>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 transition-colors"
-          aria-label="Cerrar formulario"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </header>
-
       {error && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-6 mt-4">
           <div className="flex">
@@ -262,7 +435,7 @@ const onSubmit = async (data) => {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">
+              <p className="text-sm text-red-700 whitespace-pre-line">
                 {submitError}
               </p>
             </div>
@@ -282,12 +455,15 @@ const onSubmit = async (data) => {
               type="text"
               id="codigoPatilla"
               aria-required="true"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.codigoPatilla
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm uppercase ${
+                errors.codigoPatilla
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Ej: CP001"
               {...register('codigoPatilla')}
+              onKeyPress={handleNoSpacesInput}
+              onChange={(e) => handleAlphanumericInput(e, 'codigoPatilla')}
             />
             {errors.codigoPatilla && (
               <p className="text-red-500 text-xs mt-1">{errors.codigoPatilla.message}</p>
@@ -303,12 +479,15 @@ const onSubmit = async (data) => {
               type="text"
               id="codigoInterno"
               aria-required="true"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.codigoInterno
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm uppercase ${
+                errors.codigoInterno
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Ej: CI001"
               {...register('codigoInterno')}
+              onKeyPress={handleNoSpacesInput}
+              onChange={(e) => handleAlphanumericInput(e, 'codigoInterno')}
             />
             {errors.codigoInterno && (
               <p className="text-red-500 text-xs mt-1">{errors.codigoInterno.message}</p>
@@ -324,12 +503,15 @@ const onSubmit = async (data) => {
               type="text"
               id="codigoColor"
               aria-required="true"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.codigoColor
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm uppercase ${
+                errors.codigoColor
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Ej: CC001"
               {...register('codigoColor')}
+              onKeyPress={handleNoSpacesInput}
+              onChange={(e) => handleAlphanumericInput(e, 'codigoColor')}
             />
             {errors.codigoColor && (
               <p className="text-red-500 text-xs mt-1">{errors.codigoColor.message}</p>
@@ -347,10 +529,11 @@ const onSubmit = async (data) => {
             id="descripcion"
             aria-required="true"
             rows={3}
-            className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.descripcion
+            className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+              errors.descripcion
                 ? "border-red-300 bg-red-50"
                 : "border-gray-300 hover:border-gray-400"
-              }`}
+            }`}
             placeholder="Descripción detallada del armazón..."
             {...register('descripcion')}
           />
@@ -368,10 +551,11 @@ const onSubmit = async (data) => {
             <input
               type="text"
               id="letraColor"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.letraColor
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.letraColor
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Ej: N, R, A"
               {...register('letraColor')}
             />
@@ -390,12 +574,14 @@ const onSubmit = async (data) => {
               id="tipoArmazon"
               aria-required="true"
               list="tiposArmazon"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.tipoArmazon
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.tipoArmazon
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Selecciona o escribe un tipo"
               {...register('tipoArmazon')}
+              onKeyPress={handleNoSpacesInput}
             />
             <datalist id="tiposArmazon">
               {tiposArmazon.map((tipo) => (
@@ -417,12 +603,14 @@ const onSubmit = async (data) => {
               id="material"
               aria-required="true"
               list="materiales"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.material
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.material
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Selecciona o escribe un material"
               {...register('material')}
+              onKeyPress={handleNoSpacesInput}
             />
             <datalist id="materiales">
               {materiales.map((material) => (
@@ -444,10 +632,11 @@ const onSubmit = async (data) => {
               id="ubicacion"
               aria-required="true"
               list="ubicaciones"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.ubicacion
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.ubicacion
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
+              }`}
               placeholder="Selecciona o escribe una ubicación"
               {...register('ubicacion')}
             />
@@ -473,11 +662,14 @@ const onSubmit = async (data) => {
               type="number"
               id="cantidad"
               aria-required="true"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.cantidad
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.cantidad
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
-              min="0"
+              }`}
+              min="1"
+              step="1"
+              onKeyPress={handleNumericInput}
               {...register('cantidad')}
             />
             {errors.cantidad && (
@@ -492,11 +684,14 @@ const onSubmit = async (data) => {
             <input
               type="number"
               id="cantidadMinima"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.cantidadMinima
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.cantidadMinima
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
-              min="0"
+              }`}
+              min="1"
+              step="1"
+              onKeyPress={handleNumericInput}
               {...register('cantidadMinima')}
             />
             {errors.cantidadMinima && (
@@ -512,11 +707,13 @@ const onSubmit = async (data) => {
               type="number"
               id="costo"
               step="0.01"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.costo
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.costo
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
-              min="0"
+              }`}
+              min="0.01"
+              onKeyPress={handleNumericInput}
               {...register('costo')}
             />
             {errors.costo && (
@@ -534,11 +731,13 @@ const onSubmit = async (data) => {
               id="precioVenta"
               aria-required="true"
               step="0.01"
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${errors.precioVenta
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                errors.precioVenta
                   ? "border-red-300 bg-red-50"
                   : "border-gray-300 hover:border-gray-400"
-                }`}
-              min="0"
+              }`}
+              min="0.01"
+              onKeyPress={handleNumericInput}
               {...register('precioVenta')}
             />
             {errors.precioVenta && (
@@ -547,40 +746,19 @@ const onSubmit = async (data) => {
           </div>
         </div>
 
-        {/* Checkbox Activo */}
-        <div className="flex items-center mb-6">
-          <input
-            type="checkbox"
-            id="activo"
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            {...register('activo')}
-          />
-          <label htmlFor="activo" className="ml-2 block text-sm text-gray-900">
-            Armazón activo en inventario
-          </label>
-        </div>
-
         {/* Botones */}
         <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
           <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <X className="size-4 mr-2" />
-            Cancelar
-          </button>
-          <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || verificandoDuplicados}
             className="flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? (
+            {(isSubmitting || verificandoDuplicados) ? (
               <Loader className="size-4 animate-spin mr-2" />
             ) : (
               <Save className="size-4 mr-2" />
             )}
-            {isSubmitting ? 'Guardando...' : 'Guardar Armazón'}
+            {verificandoDuplicados ? 'Verificando...' : isSubmitting ? 'Guardando...' : 'Guardar Armazón'}
           </button>
         </div>
       </form>
