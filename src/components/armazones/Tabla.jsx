@@ -7,65 +7,22 @@ const Tabla = () => {
   const [armazones, setArmazones] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getArmazones = async () => {
-    try {
-      setLoading(true);
-      // const response = await fetch("/api/armazones");
-      const res = await new Promise((resolve) =>
-        setTimeout(
-          () =>
-            resolve([
-              {
-                id: 1,
-                codigoPatilla: "CP001",
-                codigoInterno: "CI001",
-                codigoColor: "CC001",
-                lineaColor: "Negro",
-                tipo: "Ovalado",
-                material: "Acetato",
-                ubicacion: "Estante A",
-                cantidad: 15,
-                costo: 45.5,
-                precioVenta: 120.0,
-              },
-              {
-                id: 2,
-                codigoPatilla: "CP002",
-                codigoInterno: "CI002",
-                codigoColor: "CC002",
-                lineaColor: "Marrón",
-                tipo: "Rectangular",
-                material: "Metal",
-                ubicacion: "Estante B",
-                cantidad: 8,
-                costo: 60.0,
-                precioVenta: 150.0,
-              },
-              {
-                id: 3,
-                codigoPatilla: "CP003",
-                codigoInterno: "CI003",
-                codigoColor: "CC003",
-                lineaColor: "Azul",
-                tipo: "Redondo",
-                material: "Plástico",
-                ubicacion: "Estante C",
-                cantidad: 20,
-                costo: 35.0,
-                precioVenta: 95.0,
-              },
-            ]),
-          1000
-        )
-      );
-      setArmazones(res || []);
-    } catch (error) {
-      console.error("Error al obtener los armazones:", error);
-    } finally {
-      setLoading(false);
+const getArmazones = async () => {
+  try {
+    setLoading(true);
+    // Usar la misma estrategia que en Formulario.jsx
+    const response = await fetch("/api/armazones/");
+    if (!response.ok) {
+      throw new Error("Error al obtener los armazones");
     }
-  };
-
+    const data = await response.json();
+    setArmazones(data || []);
+  } catch (error) {
+    console.error("Error al obtener los armazones:", error);
+  } finally {
+    setLoading(false);
+  }
+};
   const toggleFormulario = () => {
     setMostrarFormulario(!mostrarFormulario);
   };
@@ -81,6 +38,8 @@ const Tabla = () => {
       </div>
     );
   }
+
+  const currecy = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARG" })
 
   return (
     <section className="bg-white shadow-lg rounded-lg overflow-hidden max-w-7xl mx-auto">
@@ -171,10 +130,10 @@ const Tabla = () => {
                   {armazon.codigoColor}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {armazon.lineaColor}
+                  {armazon.letraColor}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {armazon.tipo}
+                  {armazon.tipoArmazon}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {armazon.material}
@@ -186,10 +145,10 @@ const Tabla = () => {
                   {armazon.cantidad}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  ${armazon.costo.toFixed(2)}
+                  {currecy.format(armazon.costo)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                  ${armazon.precioVenta.toFixed(2)}
+                  {currecy.format(armazon.precioVenta)}
                 </td>
               </tr>
             ))}
