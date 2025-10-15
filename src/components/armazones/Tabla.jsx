@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import Formulario from "./Formulario";
-import { Loader, Plus, Minus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X } from "lucide-react";
-import { ToastContainer } from 'react-toastify'
+import {
+  Loader,
+  Plus,
+  Minus,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Search,
+  X,
+} from "lucide-react";
+import useUser from "../../context/useUser";
 
 const Tabla = () => {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -11,6 +21,7 @@ const Tabla = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useUser();
 
   const getArmazones = async () => {
     try {
@@ -39,8 +50,8 @@ const Tabla = () => {
     }
 
     const lowercasedTerm = term.toLowerCase().trim();
-    const filtered = armazones.filter(armazon =>
-      Object.values(armazon).some(value =>
+    const filtered = armazones.filter((armazon) =>
+      Object.values(armazon).some((value) =>
         value?.toString().toLowerCase().includes(lowercasedTerm)
       )
     );
@@ -88,10 +99,13 @@ const Tabla = () => {
     );
   }
 
-  const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
+  const currency = new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+  });
 
   return (
-    <section className="bg-white shadow-lg rounded-lg overflow-hidden max-w-7xl mx-auto">
+    <section className="bg-white shadow-lg rounded-lg overflow-hidden max-w-7xl mx-auto my-4">
       {/* Header con título y botón */}
       <header className="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-black">
@@ -99,10 +113,11 @@ const Tabla = () => {
         </h1>
         <button
           onClick={toggleFormulario}
-          className={`${mostrarFormulario
+          className={`${
+            mostrarFormulario
               ? "bg-red-600 hover:bg-red-700"
               : "bg-blue-600 hover:bg-blue-700"
-            } text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+          } text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
           aria-label={
             mostrarFormulario ? "Cerrar formulario" : "Agregar nuevo armazón"
           }
@@ -152,11 +167,11 @@ const Tabla = () => {
         </div>
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
-            {filteredArmazones.length === 0 ? (
-              "No se encontraron resultados"
-            ) : (
-              `Se encontraron ${filteredArmazones.length} armazón${filteredArmazones.length !== 1 ? 'es' : ''}`
-            )}
+            {filteredArmazones.length === 0
+              ? "No se encontraron resultados"
+              : `Se encontraron ${filteredArmazones.length} armazón${
+                  filteredArmazones.length !== 1 ? "es" : ""
+                }`}
           </p>
         )}
       </div>
@@ -180,7 +195,8 @@ const Tabla = () => {
 
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-700">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} elementos
+            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de{" "}
+            {totalItems} elementos
           </span>
         </div>
       </div>
@@ -190,41 +206,78 @@ const Tabla = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 C. Patilla
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 C. Interno
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 C. Color
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 L. Color
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Tipo
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Material
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Ubicacion
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Cantidad
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Costo
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                P. Venta
-              </th>
+              {["admin"].includes(user.rol.nombre) && (
+                <>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Costo
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    P. Venta
+                  </th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentData.map((armazon) => (
-              <tr key={armazon.id} className="hover:bg-gray-50 transition-colors duration-200">
+              <tr
+                key={armazon.id}
+                className="hover:bg-gray-50 transition-colors duration-200"
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {armazon.codigoPatilla}
                 </td>
@@ -249,12 +302,16 @@ const Tabla = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                   {armazon.cantidad}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {currency.format(armazon.costo)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                  {currency.format(armazon.precioVenta)}
-                </td>
+                {["admin"].includes(user.rol.nombre) && (
+                  <>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {currency.format(armazon.costo)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                      {currency.format(armazon.precioVenta)}
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
@@ -301,16 +358,24 @@ const Tabla = () => {
                   <button
                     key={pageNumber}
                     onClick={() => goToPage(pageNumber)}
-                    className={`w-8 h-8 rounded-md text-sm font-medium ${currentPage === pageNumber
+                    className={`w-8 h-8 rounded-md text-sm font-medium ${
+                      currentPage === pageNumber
                         ? "bg-blue-600 text-white"
                         : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                      } transition-colors`}
+                    } transition-colors`}
                   >
                     {pageNumber}
                   </button>
                 );
-              } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
-                return <span key={pageNumber} className="px-2">...</span>;
+              } else if (
+                pageNumber === currentPage - 2 ||
+                pageNumber === currentPage + 2
+              ) {
+                return (
+                  <span key={pageNumber} className="px-2">
+                    ...
+                  </span>
+                );
               }
               return null;
             })}
@@ -347,20 +412,7 @@ const Tabla = () => {
           />
         </div>
       </div>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
     </section>
-
   );
 };
 

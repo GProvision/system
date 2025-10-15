@@ -42,8 +42,8 @@ const UsuariosPage = () => {
           ),
         clave: z
           .string()
-          .refine((val) => val.replace(/\s+/g, " ").length > 8, {
-            message: "Minimo 8 caracteres",
+          .refine((val) => val.replace(/\s+/g, " ").length > 4, {
+            message: "Minimo 4 caracteres",
           })
           .refine((val) => /[A-Z]/.test(val), {
             message: "Debe tener 1 mayuscula",
@@ -56,8 +56,8 @@ const UsuariosPage = () => {
           }),
         usuario: z
           .string()
-          .refine((val) => val.replace(/\s+/g, " ").length > 8, {
-            message: "Minimo 8 caracteres",
+          .refine((val) => val.replace(/\s+/g, " ").length > 3, {
+            message: "Minimo 3 caracteres",
           })
           .refine(
             (val) => !usuarios.map(({ usuario }) => usuario).includes(val),
@@ -118,7 +118,7 @@ const UsuariosPage = () => {
 
   const addUser = async (data) => {
     try {
-      const response = await fetch("/api/sindicatos", {
+      const response = await fetch("/api/usuarios", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

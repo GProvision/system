@@ -36,7 +36,6 @@ path.boss = [
   { path: "/reportes/sindicatos", alias: "Sindicatos", principal: true },
 ];
 path.owner = [
-  { path: "/owners", alias: "Inicio", principal: true },
   { path: "/fichas", alias: "Fichas", principal: true },
   { path: "/fichas/:id", alias: "Fichas Detalle", principal: false },
   { path: "/fichas/crear", alias: "Nueva Fichas ", principal: false },

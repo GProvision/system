@@ -78,8 +78,6 @@ const AdminsPage = () => {
     } catch (error) {
       console.error("Error:", error);
       toast.error(error.message || "Error al actualizar el estado");
-      // Revertir el cambio en la UI en caso de error
-      setStateForm.setValue("activo", !data.activo);
     }
   };
 
