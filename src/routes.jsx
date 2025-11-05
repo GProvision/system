@@ -8,11 +8,14 @@ import DelegacionesPage from "./pages/delegaciones/DelegacionesPage";
 import DelegacionPage from "./pages/delegaciones/DelegacionPage";
 import ArmazonesPage from "./pages/armazones/ArmazonesPage";
 import ArmazonPage from "./pages/armazones/ArmazonPage";
-// import ArmazonStockPage from "./pages/armazones/ArmazonStockPage";
 import OpticasPage from "./pages/opticas/OpticasPage";
 import OpticaPage from "./pages/opticas/OpticaPage";
 import UsuariosPage from "./pages/usuarios/UsuariosPage";
 import AdminsPage from "./pages/roles/AdminsPage";
+import FichasPage from "./pages/fichas/FichasPage";
+import FichasReportePage from "./pages/fichas/FichasReportePage";
+import FichaCreatePage from "./pages/fichas/FichaCreatePage";
+import FichaPage from "./pages/fichas/FichaPage";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -67,7 +70,24 @@ const routes = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <h1>Fichas</h1>,
+            element: <FichasPage />,
+          },
+          {
+            path: "reporte",
+            element: <FichasReportePage />,
+          },
+          {
+            path: "create",
+            element: <FichaCreatePage />,
+          },
+          {
+            path: ":id",
+            children: [
+              {
+                index: true,
+                element: <FichaPage />,
+              },
+            ],
           },
         ],
       },
