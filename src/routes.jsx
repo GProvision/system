@@ -77,7 +77,7 @@ const routes = createBrowserRouter([
             element: <FichasReportePage />,
           },
           {
-            path: "create",
+            path: "crear",
             element: <FichaCreatePage />,
           },
           {
